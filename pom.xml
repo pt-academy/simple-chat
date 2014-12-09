@@ -2,11 +2,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>sk.spsjm.ptacademy</groupId>
-  <artifactId>chat</artifactId>
-  <packaging>jar</packaging>
+  <artifactId>ptacademy-parent</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>chat</name>
+  <packaging>pom</packaging>
+  <modules>
+    <module>chat</module>
+  </modules>
   <url>http://maven.apache.org</url>
+
   <build>
     <plugins>
         <plugin>
