@@ -16,6 +16,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import sk.spsjm.ptacademy.chat.util.MessageUtils;
+
 
 /**
  * @author michal.polkorab
@@ -26,17 +28,14 @@ public class ServerConnection extends Thread {
     private Socket socket;
     private List<ClientConnectionData> clientConnectionDataList = new ArrayList<>();
     private BufferedReader input;
-    private DataOutputStream myOutput;
+    private ClientConnectionData myClientData;
 
     public ServerConnection(Socket socket, List<ClientConnectionData> clientData) {
-        this.socket = socket;
-        try {
+       try {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            myOutput = new DataOutputStream(socket.getOutputStream());
-
-            ClientConnectionData clientConnData = new ClientConnectionData(myOutput);
-            clientConnectionDataList.add(clientConnData);
-            clientData.add(clientConnData);
+            myClientData = new ClientConnectionData(new DataOutputStream(socket.getOutputStream()), socket);
+            clientData.add(myClientData);
+            this.clientConnectionDataList = clientData;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -45,27 +44,17 @@ public class ServerConnection extends Thread {
     @Override
     public void run() {
         // citaj data kym je socket otvoreny
-        while (! socket.isClosed()) {
+        while (! myClientData.getSocket().isClosed()) {
             String message;
             try {
                 // skontroluj ci nieco caka na vstupe
                 if (input.ready()) {
                     // precitaj spravu
                     message = input.readLine();
-                    if (message.equals("/quit")) {
-                        System.out.println("Ukoncujem spojenie");
-                        socket.close();
-                        for (ClientConnectionData clientConnectionData:clientConnectionDataList){
-                            if (clientConnectionData.getDataOutputStream().equals(myOutput)){
-                                clientConnectionDataList.remove(clientConnectionData);
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    // zapis spravu vsetkym pripojenym klientom
-                    for (ClientConnectionData clientConnectionData : clientConnectionDataList) {
-                        clientConnectionData.getDataOutputStream().writeBytes(message + "\n");
+                    if (MessageUtils.isCommand(message)){
+                        ClientCommandInterpreter.processCommand(message, clientConnectionDataList, myClientData);
+                    } else {
+                        ClientMessageForwarder.forwardMessage(message, clientConnectionDataList, myClientData);
                     }
                 }
                 // uvolni thread pre dalsie aplikacie

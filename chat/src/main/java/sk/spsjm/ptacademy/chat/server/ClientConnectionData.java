@@ -9,6 +9,7 @@
 package sk.spsjm.ptacademy.chat.server;
 
 import java.io.DataOutputStream;
+import java.net.Socket;
 
 /**
  * @author michal.polkorab
@@ -18,12 +19,14 @@ public class ClientConnectionData {
 
     private DataOutputStream dataOutputStream;
     private String nick;
+    private Socket socket;
 
-    public ClientConnectionData(DataOutputStream dataOutputStream){
+    public ClientConnectionData(DataOutputStream dataOutputStream, Socket socket){
         if (dataOutputStream == null){
             throw new IllegalStateException("Client's data output stream can't be null.");
         }
         this.dataOutputStream = dataOutputStream;
+        this.socket = socket;
     }
 
     public String getNick() {
@@ -37,4 +40,10 @@ public class ClientConnectionData {
     public DataOutputStream getDataOutputStream() {
         return dataOutputStream;
     }
+
+    public Socket getSocket() {
+        return socket;
+    }
+    
+    
 }
